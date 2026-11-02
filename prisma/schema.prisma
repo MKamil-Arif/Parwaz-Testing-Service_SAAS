@@ -1,0 +1,808 @@
+// Rewarding Potential - SQL Server data model.
+//
+// Conventions
+// - Int identity primary keys; public-facing identifiers (registration numbers, payment
+//   references, exam attempt ids) are separate random/sequential codes.
+// - SQL Server has no enums: status/type columns are NVARCHAR and the allowed values
+//   live in src/lib/constants.ts and are validated with zod before every write.
+// - SQL Server rejects multiple cascade paths, so relations default to NoAction and
+//   only leaf/child tables cascade. Records with history are archived, never deleted.
+// - Unique indexes are only placed on NOT NULL columns (SQL Server treats NULLs as equal).
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlserver"
+  url      = env("DATABASE_URL")
+}
+
+// ───────────────────────────── Identity & access ─────────────────────────────
+
+model User {
+  id                 Int       @id @default(autoincrement())
+  email              String    @unique @db.NVarChar(256)
+  fullName           String    @db.NVarChar(150)
+  phone              String    @db.NVarChar(20)
+  passwordHash       String    @db.NVarChar(100)
+  status             String    @default("ACTIVE") @db.NVarChar(20)
+  emailVerifiedAt    DateTime?
+  mustChangePassword Boolean   @default(false)
+  failedLoginCount   Int       @default(0)
+  lockedUntil        DateTime?
+  lastLoginAt        DateTime?
+  referralCode       String    @unique @db.NVarChar(16)
+  signupCampaignId   Int?
+  isDemo             Boolean   @default(false)
+  createdAt          DateTime  @default(now())
+  updatedAt          DateTime  @updatedAt
+
+  signupCampaign MarketingCampaign? @relation(fields: [signupCampaignId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  profile        StudentProfile?
+  roles          UserRole[]
+  sessions       Session[]
+  authTokens     AuthToken[]
+  registrations  CompetitionRegistration[]
+  notifications  Notification[]
+  supportTickets SupportTicket[]           @relation("TicketOwner")
+  referralsMade  Referral[]                @relation("Referrer")
+  referredBy     Referral?                 @relation("Referred")
+
+  @@index([status])
+  @@index([createdAt])
+  @@index([signupCampaignId])
+}
+
+model Role {
+  id          Int        @id @default(autoincrement())
+  name        String     @unique @db.NVarChar(50)
+  description String?    @db.NVarChar(255)
+  users       UserRole[]
+}
+
+model UserRole {
+  userId     Int
+  roleId     Int
+  assignedAt DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  role Role @relation(fields: [roleId], references: [id], onDelete: Cascade, onUpdate: NoAction)
+
+  @@id([userId, roleId])
+  @@index([roleId])
+}
+
+model Session {
+  id         Int      @id @default(autoincrement())
+  userId     Int
+  tokenHash  String   @unique @db.VarChar(64)
+  expiresAt  DateTime
+  ipAddress  String?  @db.NVarChar(64)
+  userAgent  String?  @db.NVarChar(400)
+  createdAt  DateTime @default(now())
+  lastSeenAt DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: NoAction)
+
+  @@index([userId])
+  @@index([expiresAt])
+}
+
+/// Single-use tokens for email verification and password reset (only the SHA-256 hash is stored).
+model AuthToken {
+  id        Int       @id @default(autoincrement())
+  userId    Int
+  type      String    @db.NVarChar(30)
+  tokenHash String    @unique @db.VarChar(64)
+  expiresAt DateTime
+  usedAt    DateTime?
+  createdAt DateTime  @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: NoAction)
+
+  @@index([userId, type])
+}
+
+model StudentProfile {
+  id                      Int       @id @default(autoincrement())
+  userId                  Int       @unique
+  city                    String    @db.NVarChar(100)
+  district                String    @db.NVarChar(100)
+  institution             String    @db.NVarChar(200)
+  classLevel              String    @db.NVarChar(20)
+  dateOfBirth             DateTime  @db.Date
+  guardianName            String?   @db.NVarChar(150)
+  guardianPhone           String?   @db.NVarChar(20)
+  guardianRelation        String?   @db.NVarChar(50)
+  guardianConsentAt       DateTime?
+  guardianConsentVerified Boolean   @default(false)
+  leaderboardNameMode     String    @default("INITIALS") @db.NVarChar(20)
+  mediaConsent            Boolean   @default(false)
+  termsAcceptedAt         DateTime
+  updatedAt               DateTime  @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: NoAction)
+
+  @@index([district])
+  @@index([classLevel])
+}
+
+// ───────────────────────────── Competitions ─────────────────────────────
+
+model Competition {
+  id                   Int       @id @default(autoincrement())
+  slug                 String    @unique @db.NVarChar(120)
+  title                String    @db.NVarChar(200)
+  summary              String    @db.NVarChar(500)
+  description          String    @db.NVarChar(Max)
+  subjects             String    @db.NVarChar(300)
+  eligibilityText      String    @db.NVarChar(Max)
+  rules                String    @db.NVarChar(Max)
+  tieBreakPolicy       String    @db.NVarChar(Max)
+  eligibleProvince     String?   @db.NVarChar(50)
+  minAge               Int?
+  maxAge               Int?
+  registrationFee      Decimal   @db.Decimal(12, 2)
+  targetRegistrations  Int?
+  maxRegistrations     Int?
+  registrationOpensAt  DateTime
+  registrationClosesAt DateTime
+  examStartsAt         DateTime
+  examEndsAt           DateTime
+  durationMinutes      Int
+  questionCount        Int
+  marksPerQuestion     Float?
+  totalMarks           Float
+  negativeMarking      Float     @default(0)
+  maxAttempts          Int       @default(1)
+  randomizeQuestions   Boolean   @default(true)
+  randomizeOptions     Boolean   @default(true)
+  showInstantResults   Boolean   @default(false)
+  status               String    @default("DRAFT") @db.NVarChar(20)
+  resultsStatus        String    @default("PENDING") @db.NVarChar(20)
+  meritGeneratedAt     DateTime?
+  resultsApprovedAt    DateTime?
+  resultsApprovedById  Int?
+  resultsPublishedAt   DateTime?
+  resultsPublishedById Int?
+  isDemo               Boolean   @default(false)
+  createdAt            DateTime  @default(now())
+  updatedAt            DateTime  @updatedAt
+
+  eligibleClasses CompetitionEligibleClass[]
+  questions       CompetitionQuestion[]
+  prizes          Prize[]
+  registrations   CompetitionRegistration[]
+  ceremonies      AwardCeremony[]
+  projections     FinancialProjection[]
+  expenses        BusinessExpense[]
+  announcements   Announcement[]
+  landingPages    MarketingCampaign[]
+  supportTickets  SupportTicket[]
+
+  @@index([status, examStartsAt])
+}
+
+model CompetitionEligibleClass {
+  competitionId Int
+  classLevel    String @db.NVarChar(20)
+
+  competition Competition @relation(fields: [competitionId], references: [id], onDelete: Cascade, onUpdate: NoAction)
+
+  @@id([competitionId, classLevel])
+}
+
+/// Prize tier of a competition, e.g. ranks 1-10 receive a laptop.
+model Prize {
+  id                 Int      @id @default(autoincrement())
+  competitionId      Int
+  title              String   @db.NVarChar(150)
+  category           String   @db.NVarChar(30)
+  description        String?  @db.NVarChar(1000)
+  rankFrom           Int
+  rankTo             Int
+  quantity           Int
+  estimatedUnitValue Decimal  @db.Decimal(12, 2)
+  sortOrder          Int      @default(0)
+  createdAt          DateTime @default(now())
+  updatedAt          DateTime @updatedAt
+
+  competition Competition       @relation(fields: [competitionId], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  allocations PrizeAllocation[]
+  purchases   BusinessExpense[]
+
+  @@index([competitionId])
+}
+
+model CompetitionRegistration {
+  id                     Int       @id @default(autoincrement())
+  registrationNumber     String    @unique @db.NVarChar(30)
+  userId                 Int
+  competitionId          Int
+  status                 String    @db.NVarChar(30)
+  eligibilityConfirmedAt DateTime
+  rulesAcceptedAt        DateTime
+  confirmedAt            DateTime?
+  cancelledAt            DateTime?
+  cancellationReason     String?   @db.NVarChar(500)
+  createdAt              DateTime  @default(now())
+  updatedAt              DateTime  @updatedAt
+
+  user        User          @relation(fields: [userId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  competition Competition   @relation(fields: [competitionId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  payments    Payment[]
+  attempts    ExamAttempt[]
+
+  @@unique([userId, competitionId])
+  @@index([competitionId, status])
+  @@index([createdAt])
+}
+
+// ───────────────────────────── Payments ─────────────────────────────
+
+model Payment {
+  id                   Int       @id @default(autoincrement())
+  reference            String    @unique @db.NVarChar(40)
+  registrationId       Int
+  amount               Decimal   @db.Decimal(12, 2)
+  currency             String    @default("PKR") @db.NVarChar(3)
+  method               String    @db.NVarChar(30)
+  status               String    @db.NVarChar(30)
+  isSandbox            Boolean   @default(false)
+  gatewayTransactionId String?   @db.NVarChar(100)
+  payerReference       String?   @db.NVarChar(100)
+  payerAccount         String?   @db.NVarChar(100)
+  payerNote            String?   @db.NVarChar(500)
+  failureReason        String?   @db.NVarChar(500)
+  paidAt               DateTime?
+  verifiedAt           DateTime?
+  verifiedById         Int?
+  refundStatus         String?   @db.NVarChar(30)
+  refundAmount         Decimal?  @db.Decimal(12, 2)
+  refundReason         String?   @db.NVarChar(500)
+  refundedAt           DateTime?
+  createdAt            DateTime  @default(now())
+  updatedAt            DateTime  @updatedAt
+
+  registration CompetitionRegistration @relation(fields: [registrationId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  events       PaymentEvent[]
+
+  @@index([registrationId])
+  @@index([status])
+  @@index([createdAt])
+}
+
+/// Raw gateway callbacks/webhooks with their signature-verification outcome (audit trail).
+model PaymentEvent {
+  id             Int      @id @default(autoincrement())
+  paymentId      Int?
+  provider       String   @db.NVarChar(30)
+  eventType      String   @db.NVarChar(50)
+  payload        String   @db.NVarChar(Max)
+  signatureValid Boolean
+  outcome        String   @db.NVarChar(200)
+  createdAt      DateTime @default(now())
+
+  payment Payment? @relation(fields: [paymentId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+
+  @@index([paymentId])
+}
+
+// ───────────────────────────── Question bank ─────────────────────────────
+
+model QuestionCategory {
+  id          Int        @id @default(autoincrement())
+  name        String     @unique @db.NVarChar(100)
+  description String?    @db.NVarChar(500)
+  questions   Question[]
+}
+
+model Question {
+  id          Int      @id @default(autoincrement())
+  categoryId  Int
+  type        String   @default("MCQ") @db.NVarChar(20)
+  text        String   @db.NVarChar(Max)
+  explanation String?  @db.NVarChar(Max)
+  difficulty  String   @default("MEDIUM") @db.NVarChar(10)
+  marks       Float    @default(1)
+  status      String   @default("ACTIVE") @db.NVarChar(20)
+  isDemo      Boolean  @default(false)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  category     QuestionCategory      @relation(fields: [categoryId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  options      AnswerOption[]
+  competitions CompetitionQuestion[]
+  answers      StudentAnswer[]
+
+  @@index([categoryId, status])
+}
+
+model AnswerOption {
+  id         Int     @id @default(autoincrement())
+  questionId Int
+  text       String  @db.NVarChar(1000)
+  isCorrect  Boolean @default(false)
+  sortOrder  Int
+
+  question Question        @relation(fields: [questionId], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  selected StudentAnswer[]
+
+  @@index([questionId])
+}
+
+/// The question pool a competition draws its examination from.
+model CompetitionQuestion {
+  competitionId Int
+  questionId    Int
+  addedAt       DateTime @default(now())
+
+  competition Competition @relation(fields: [competitionId], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  question    Question    @relation(fields: [questionId], references: [id], onDelete: Cascade, onUpdate: NoAction)
+
+  @@id([competitionId, questionId])
+  @@index([questionId])
+}
+
+// ───────────────────────────── Examinations ─────────────────────────────
+
+model ExamAttempt {
+  id                  Int       @id @default(autoincrement())
+  publicId            String    @unique @db.VarChar(32)
+  registrationId      Int
+  attemptNumber       Int
+  status              String    @db.NVarChar(20)
+  startedAt           DateTime
+  expiresAt           DateTime
+  submittedAt         DateTime?
+  submissionType      String?   @db.NVarChar(20)
+  identityConfirmedAt DateTime
+  sessionId           Int?
+  ipAddress           String?   @db.NVarChar(64)
+  userAgent           String?   @db.NVarChar(400)
+  lastSavedAt         DateTime?
+  flagCount           Int       @default(0)
+  voidReason          String?   @db.NVarChar(500)
+
+  registration CompetitionRegistration @relation(fields: [registrationId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  answers      StudentAnswer[]
+  activityLogs ExamActivityLog[]
+  result       ExamResult?
+
+  @@unique([registrationId, attemptNumber])
+  @@index([status, expiresAt])
+}
+
+/// One row per question served in an attempt; also stores the randomized order.
+model StudentAnswer {
+  id               Int       @id @default(autoincrement())
+  attemptId        Int
+  questionId       Int
+  position         Int
+  optionOrder      String    @db.VarChar(200)
+  selectedOptionId Int?
+  textAnswer       String?   @db.NVarChar(Max)
+  markedForReview  Boolean   @default(false)
+  answeredAt       DateTime?
+  isCorrect        Boolean?
+  marksAwarded     Float?
+  reviewedById     Int?
+  reviewedAt       DateTime?
+  reviewNote       String?   @db.NVarChar(500)
+
+  attempt        ExamAttempt   @relation(fields: [attemptId], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  question       Question      @relation(fields: [questionId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  selectedOption AnswerOption? @relation(fields: [selectedOptionId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+
+  @@unique([attemptId, questionId])
+  @@unique([attemptId, position])
+  @@index([questionId])
+}
+
+model ExamActivityLog {
+  id        Int      @id @default(autoincrement())
+  attemptId Int
+  eventType String   @db.NVarChar(40)
+  details   String?  @db.NVarChar(500)
+  ipAddress String?  @db.NVarChar(64)
+  createdAt DateTime @default(now())
+
+  attempt ExamAttempt @relation(fields: [attemptId], references: [id], onDelete: Cascade, onUpdate: NoAction)
+
+  @@index([attemptId])
+}
+
+// ───────────────────────────── Results & prizes ─────────────────────────────
+
+/// Graded outcome of an attempt. meritRank is assigned when the merit list is generated;
+/// the leaderboard is this table filtered to published competitions.
+model ExamResult {
+  id                 Int       @id @default(autoincrement())
+  attemptId          Int       @unique
+  totalQuestions     Int
+  correctCount       Int
+  incorrectCount     Int
+  unansweredCount    Int
+  pendingReviewCount Int       @default(0)
+  score              Float
+  maxScore           Float
+  percentage         Float
+  timeTakenSeconds   Int
+  status             String    @db.NVarChar(20)
+  meritRank          Int?
+  verifiedById       Int?
+  verifiedAt         DateTime?
+  notes              String?   @db.NVarChar(1000)
+  createdAt          DateTime  @default(now())
+  updatedAt          DateTime  @updatedAt
+
+  attempt         ExamAttempt       @relation(fields: [attemptId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  changeLogs      ResultChangeLog[]
+  prizeAllocation PrizeAllocation?
+  disputes        SupportTicket[]
+
+  @@index([status])
+  @@index([meritRank])
+}
+
+model ResultChangeLog {
+  id          Int      @id @default(autoincrement())
+  resultId    Int
+  changedById Int?
+  field       String   @db.NVarChar(50)
+  oldValue    String?  @db.NVarChar(200)
+  newValue    String?  @db.NVarChar(200)
+  reason      String   @db.NVarChar(1000)
+  createdAt   DateTime @default(now())
+
+  result ExamResult @relation(fields: [resultId], references: [id], onDelete: Cascade, onUpdate: NoAction)
+
+  @@index([resultId])
+}
+
+model PrizeAllocation {
+  id                Int       @id @default(autoincrement())
+  prizeId           Int
+  resultId          Int       @unique
+  rank              Int
+  status            String    @db.NVarChar(30)
+  verificationNotes String?   @db.NVarChar(1000)
+  verifiedById      Int?
+  verifiedAt        DateTime?
+  publicApproved    Boolean   @default(false)
+  createdAt         DateTime  @default(now())
+  updatedAt         DateTime  @updatedAt
+
+  prize        Prize              @relation(fields: [prizeId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  result       ExamResult         @relation(fields: [resultId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  distribution PrizeDistribution?
+
+  @@index([prizeId])
+  @@index([status])
+}
+
+model PrizeDistribution {
+  id                 Int       @id @default(autoincrement())
+  allocationId       Int       @unique
+  status             String    @db.NVarChar(30)
+  method             String    @db.NVarChar(30)
+  ceremonyId         Int?
+  scheduledDate      DateTime?
+  deliveredAt        DateTime?
+  deliveryAddress    String?   @db.NVarChar(500)
+  trackingReference  String?   @db.NVarChar(100)
+  deviceSerialNumber String?   @db.NVarChar(100)
+  receivedBy         String?   @db.NVarChar(150)
+  notes              String?   @db.NVarChar(1000)
+  updatedAt          DateTime  @updatedAt
+
+  allocation PrizeAllocation @relation(fields: [allocationId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  ceremony   AwardCeremony?  @relation(fields: [ceremonyId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+
+  @@index([ceremonyId])
+}
+
+// ───────────────────────────── Award ceremonies ─────────────────────────────
+
+model AwardCeremony {
+  id            Int       @id @default(autoincrement())
+  slug          String    @unique @db.NVarChar(120)
+  title         String    @db.NVarChar(200)
+  city          String    @db.NVarChar(100)
+  venue         String    @db.NVarChar(300)
+  eventDate     DateTime
+  description   String    @db.NVarChar(Max)
+  status        String    @default("DRAFT") @db.NVarChar(20)
+  competitionId Int?
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  competition   Competition?        @relation(fields: [competitionId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  media         CeremonyMedia[]
+  distributions PrizeDistribution[]
+  announcements Announcement[]
+
+  @@index([status, eventDate])
+}
+
+/// Photos must have consentConfirmed=true (consent from every identifiable student/guardian) to be shown publicly.
+model CeremonyMedia {
+  id               Int      @id @default(autoincrement())
+  ceremonyId       Int
+  type             String   @db.NVarChar(10)
+  url              String   @db.NVarChar(500)
+  caption          String?  @db.NVarChar(300)
+  consentConfirmed Boolean  @default(false)
+  isPublished      Boolean  @default(false)
+  sortOrder        Int      @default(0)
+  createdAt        DateTime @default(now())
+
+  ceremony AwardCeremony @relation(fields: [ceremonyId], references: [id], onDelete: Cascade, onUpdate: NoAction)
+
+  @@index([ceremonyId])
+}
+
+/// Uploaded image bytes, stored in the database so uploads work on serverless hosts (no persistent disk).
+model MediaFile {
+  id          Int      @id @default(autoincrement())
+  publicId    String   @unique @db.VarChar(32)
+  contentType String   @db.VarChar(50)
+  size        Int
+  data        Bytes
+  createdAt   DateTime @default(now())
+}
+
+// ───────────────────────────── Communication ─────────────────────────────
+
+model Notification {
+  id        Int       @id @default(autoincrement())
+  userId    Int
+  type      String    @db.NVarChar(40)
+  title     String    @db.NVarChar(200)
+  body      String    @db.NVarChar(2000)
+  link      String?   @db.NVarChar(300)
+  readAt    DateTime?
+  createdAt DateTime  @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: NoAction)
+
+  @@index([userId, readAt])
+  @@index([createdAt])
+}
+
+/// Admin-sent announcement to a group of users (fanned out into Notification rows).
+model NotificationBroadcast {
+  id             Int      @id @default(autoincrement())
+  title          String   @db.NVarChar(200)
+  body           String   @db.NVarChar(2000)
+  link           String?  @db.NVarChar(300)
+  audience       String   @db.NVarChar(40)
+  competitionId  Int?
+  channels       String   @db.NVarChar(50)
+  recipientCount Int
+  sentById       Int?
+  createdAt      DateTime @default(now())
+}
+
+/// Every outgoing email. Without SMTP configured, emails are only logged here (development).
+model EmailOutbox {
+  id        Int       @id @default(autoincrement())
+  toEmail   String    @db.NVarChar(256)
+  subject   String    @db.NVarChar(300)
+  body      String    @db.NVarChar(Max)
+  status    String    @db.NVarChar(20)
+  error     String?   @db.NVarChar(1000)
+  createdAt DateTime  @default(now())
+  sentAt    DateTime?
+
+  @@index([createdAt])
+}
+
+model SupportTicket {
+  id            Int      @id @default(autoincrement())
+  ticketNumber  String   @unique @db.NVarChar(30)
+  userId        Int?
+  name          String   @db.NVarChar(150)
+  email         String   @db.NVarChar(256)
+  phone         String?  @db.NVarChar(20)
+  subject       String   @db.NVarChar(200)
+  category      String   @db.NVarChar(30)
+  status        String   @default("OPEN") @db.NVarChar(20)
+  priority      String   @default("NORMAL") @db.NVarChar(10)
+  competitionId Int?
+  resultId      Int?
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  user        User?            @relation("TicketOwner", fields: [userId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  competition Competition?     @relation(fields: [competitionId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  result      ExamResult?      @relation(fields: [resultId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  messages    SupportMessage[]
+
+  @@index([status, category])
+  @@index([userId])
+}
+
+model SupportMessage {
+  id        Int      @id @default(autoincrement())
+  ticketId  Int
+  authorId  Int?
+  isStaff   Boolean  @default(false)
+  body      String   @db.NVarChar(Max)
+  createdAt DateTime @default(now())
+
+  ticket SupportTicket @relation(fields: [ticketId], references: [id], onDelete: Cascade, onUpdate: NoAction)
+
+  @@index([ticketId])
+}
+
+// ───────────────────────────── Marketing ─────────────────────────────
+
+model MarketingCampaign {
+  id                   Int       @id @default(autoincrement())
+  name                 String    @db.NVarChar(150)
+  slug                 String    @unique @db.NVarChar(80)
+  channel              String    @db.NVarChar(30)
+  status               String    @default("PLANNED") @db.NVarChar(20)
+  startDate            DateTime  @db.Date
+  endDate              DateTime? @db.Date
+  budget               Decimal?  @db.Decimal(12, 2)
+  notes                String?   @db.NVarChar(2000)
+  visitCount           Int       @default(0)
+  landingEnabled       Boolean   @default(false)
+  landingHeadline      String?   @db.NVarChar(200)
+  landingBody          String?   @db.NVarChar(Max)
+  landingCompetitionId Int?
+  createdAt            DateTime  @default(now())
+  updatedAt            DateTime  @updatedAt
+
+  landingCompetition Competition?      @relation(fields: [landingCompetitionId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  signups            User[]
+  expenses           BusinessExpense[]
+
+  @@index([status])
+}
+
+model Referral {
+  id             Int       @id @default(autoincrement())
+  referrerId     Int
+  referredUserId Int       @unique
+  status         String    @db.NVarChar(20)
+  createdAt      DateTime  @default(now())
+  convertedAt    DateTime?
+
+  referrer     User @relation("Referrer", fields: [referrerId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  referredUser User @relation("Referred", fields: [referredUserId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+
+  @@index([referrerId])
+}
+
+model NewsletterSubscriber {
+  id               Int      @id @default(autoincrement())
+  email            String   @unique @db.NVarChar(256)
+  source           String?  @db.NVarChar(80)
+  status           String   @default("SUBSCRIBED") @db.NVarChar(20)
+  unsubscribeToken String   @unique @db.VarChar(64)
+  consentAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+}
+
+/// News items, site-wide promotional banners and ceremony announcements.
+model Announcement {
+  id            Int       @id @default(autoincrement())
+  type          String    @db.NVarChar(20)
+  title         String    @db.NVarChar(200)
+  body          String    @db.NVarChar(Max)
+  linkUrl       String?   @db.NVarChar(300)
+  linkLabel     String?   @db.NVarChar(60)
+  isPublished   Boolean   @default(false)
+  startsAt      DateTime?
+  endsAt        DateTime?
+  competitionId Int?
+  ceremonyId    Int?
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  competition Competition?   @relation(fields: [competitionId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  ceremony    AwardCeremony? @relation(fields: [ceremonyId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+
+  @@index([type, isPublished])
+}
+
+// ───────────────────────────── Finance ─────────────────────────────
+
+model BusinessExpense {
+  id               Int      @id @default(autoincrement())
+  category         String   @db.NVarChar(30)
+  description      String   @db.NVarChar(300)
+  amount           Decimal  @db.Decimal(12, 2)
+  expenseDate      DateTime @db.Date
+  vendor           String?  @db.NVarChar(150)
+  receiptReference String?  @db.NVarChar(100)
+  quantity         Int?
+  prizeId          Int?
+  campaignId       Int?
+  competitionId    Int?
+  recordedById     Int?
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+
+  prize       Prize?             @relation(fields: [prizeId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  campaign    MarketingCampaign? @relation(fields: [campaignId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  competition Competition?       @relation(fields: [competitionId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+
+  @@index([category])
+  @@index([expenseDate])
+}
+
+/// Projected (budgeted) figures. Kept apart from actual payments and expenses.
+model FinancialProjection {
+  id            Int      @id @default(autoincrement())
+  competitionId Int?
+  type          String   @db.NVarChar(10)
+  category      String   @db.NVarChar(30)
+  label         String   @db.NVarChar(150)
+  amount        Decimal  @db.Decimal(12, 2)
+  sortOrder     Int      @default(0)
+  notes         String?  @db.NVarChar(500)
+  updatedAt     DateTime @updatedAt
+
+  competition Competition? @relation(fields: [competitionId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+}
+
+// ───────────────────────────── Website content ─────────────────────────────
+
+model SiteSetting {
+  key       String   @id @db.NVarChar(100)
+  value     String   @db.NVarChar(Max)
+  updatedAt DateTime @updatedAt
+}
+
+model ContentPage {
+  id        Int      @id @default(autoincrement())
+  slug      String   @unique @db.NVarChar(80)
+  title     String   @db.NVarChar(200)
+  body      String   @db.NVarChar(Max)
+  updatedAt DateTime @updatedAt
+}
+
+model FaqItem {
+  id          Int      @id @default(autoincrement())
+  category    String   @db.NVarChar(30)
+  question    String   @db.NVarChar(400)
+  answer      String   @db.NVarChar(Max)
+  sortOrder   Int      @default(0)
+  isPublished Boolean  @default(true)
+  updatedAt   DateTime @updatedAt
+}
+
+model Testimonial {
+  id              Int      @id @default(autoincrement())
+  name            String   @db.NVarChar(150)
+  role            String   @db.NVarChar(150)
+  quote           String   @db.NVarChar(1000)
+  isSample        Boolean  @default(false)
+  consentObtained Boolean  @default(false)
+  isPublished     Boolean  @default(false)
+  sortOrder       Int      @default(0)
+  createdAt       DateTime @default(now())
+}
+
+// ───────────────────────────── Audit ─────────────────────────────
+
+model AuditLog {
+  id         Int      @id @default(autoincrement())
+  actorId    Int?
+  actorEmail String?  @db.NVarChar(256)
+  action     String   @db.NVarChar(100)
+  entityType String   @db.NVarChar(50)
+  entityId   String?  @db.NVarChar(50)
+  details    String?  @db.NVarChar(Max)
+  ipAddress  String?  @db.NVarChar(64)
+  createdAt  DateTime @default(now())
+
+  @@index([entityType, entityId])
+  @@index([actorId])
+  @@index([createdAt])
+}

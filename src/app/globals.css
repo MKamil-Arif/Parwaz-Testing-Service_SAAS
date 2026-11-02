@@ -1,0 +1,130 @@
+@import "tailwindcss";
+
+@theme {
+  --font-sans: var(--font-body), ui-sans-serif, system-ui, sans-serif;
+  --font-display: var(--font-heading), var(--font-body), ui-sans-serif, system-ui, sans-serif;
+
+  --color-navy-50: #f3f6fc;
+  --color-navy-100: #e4eaf6;
+  --color-navy-200: #c9d4ec;
+  --color-navy-300: #9db0d9;
+  --color-navy-400: #6a85bf;
+  --color-navy-500: #4864a6;
+  --color-navy-600: #344d8a;
+  --color-navy-700: #283d70;
+  --color-navy-800: #1c2c55;
+  --color-navy-900: #122042;
+  --color-navy-950: #0a142d;
+
+  --color-brand-50: #eef4ff;
+  --color-brand-100: #dce7ff;
+  --color-brand-200: #bed2ff;
+  --color-brand-300: #91b2fd;
+  --color-brand-400: #5f8af8;
+  --color-brand-500: #3c68f0;
+  --color-brand-600: #284ddc;
+  --color-brand-700: #213db5;
+  --color-brand-800: #213690;
+  --color-brand-900: #213172;
+
+  --color-gold-50: #fcf8ec;
+  --color-gold-100: #f7edcc;
+  --color-gold-200: #efdb98;
+  --color-gold-300: #e4c463;
+  --color-gold-400: #d8ad3f;
+  --color-gold-500: #c49530;
+  --color-gold-600: #a67626;
+  --color-gold-700: #845a22;
+
+  --color-surface: #f6f8fc;
+
+  --shadow-card: 0 1px 2px rgb(10 20 45 / 0.04), 0 6px 20px -8px rgb(10 20 45 / 0.10);
+  --shadow-lift: 0 2px 6px rgb(10 20 45 / 0.06), 0 22px 48px -16px rgb(10 20 45 / 0.22);
+
+  --animate-fade-up: fade-up 0.7s cubic-bezier(0.2, 0.7, 0.2, 1) both;
+  --animate-float: float 7s ease-in-out infinite;
+
+  @keyframes fade-up {
+    from { opacity: 0; transform: translateY(14px); }
+    to { opacity: 1; transform: none; }
+  }
+  @keyframes float {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-8px); }
+  }
+}
+
+@layer base {
+  html {
+    -webkit-text-size-adjust: 100%;
+    scroll-behavior: smooth;
+  }
+  body {
+    @apply bg-white text-navy-900 antialiased;
+  }
+  h1, h2, h3, h4 {
+    @apply font-display tracking-tight text-navy-950;
+  }
+  :focus-visible {
+    outline: 2px solid var(--color-brand-500);
+    outline-offset: 2px;
+  }
+  ::selection {
+    background: var(--color-gold-200);
+    color: var(--color-navy-950);
+  }
+}
+
+@utility container-page {
+  width: 100%;
+  max-width: 78rem;
+  margin-inline: auto;
+  padding-inline: 1rem;
+  @media (width >= 640px) {
+    padding-inline: 1.5rem;
+  }
+  @media (width >= 1024px) {
+    padding-inline: 2rem;
+  }
+}
+
+/* Faint blueprint grid used behind dark hero sections */
+@utility bg-grid-dark {
+  background-image:
+    linear-gradient(rgb(255 255 255 / 0.045) 1px, transparent 1px),
+    linear-gradient(90deg, rgb(255 255 255 / 0.045) 1px, transparent 1px);
+  background-size: 44px 44px;
+}
+
+@utility bg-grid-light {
+  background-image:
+    linear-gradient(rgb(18 32 66 / 0.05) 1px, transparent 1px),
+    linear-gradient(90deg, rgb(18 32 66 / 0.05) 1px, transparent 1px);
+  background-size: 40px 40px;
+}
+
+@utility text-balance {
+  text-wrap: balance;
+}
+
+/* Typography for admin-editable markdown content */
+.prose-rp {
+  @apply text-[15px] leading-7 text-navy-700;
+}
+.prose-rp h2 { @apply mt-8 mb-3 text-xl font-bold text-navy-950; }
+.prose-rp h3 { @apply mt-6 mb-2 text-lg font-semibold text-navy-950; }
+.prose-rp p { @apply my-3; }
+.prose-rp ul { @apply my-3 list-disc space-y-1 pl-6; }
+.prose-rp ol { @apply my-3 list-decimal space-y-1 pl-6; }
+.prose-rp a { @apply font-medium text-brand-700 underline underline-offset-2; }
+.prose-rp strong { @apply font-semibold text-navy-900; }
+.prose-rp blockquote { @apply my-4 border-l-4 border-gold-300 bg-gold-50 px-4 py-2 text-navy-800; }
+.prose-rp table { @apply my-4 w-full text-sm; }
+.prose-rp th { @apply border-b border-navy-200 py-2 text-left font-semibold text-navy-900; }
+.prose-rp td { @apply border-b border-navy-100 py-2; }
+.prose-rp > :first-child { @apply mt-0; }
+
+@media print {
+  .no-print { display: none !important; }
+  body { background: white !important; }
+}

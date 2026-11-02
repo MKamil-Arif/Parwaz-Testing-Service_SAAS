@@ -1,0 +1,29 @@
+BEGIN TRY
+
+BEGIN TRAN;
+
+-- CreateTable
+CREATE TABLE [dbo].[MediaFile] (
+    [id] INT NOT NULL IDENTITY(1,1),
+    [publicId] VARCHAR(32) NOT NULL,
+    [contentType] VARCHAR(50) NOT NULL,
+    [size] INT NOT NULL,
+    [data] VARBINARY(max) NOT NULL,
+    [createdAt] DATETIME2 NOT NULL CONSTRAINT [MediaFile_createdAt_df] DEFAULT CURRENT_TIMESTAMP,
+    CONSTRAINT [MediaFile_pkey] PRIMARY KEY CLUSTERED ([id]),
+    CONSTRAINT [MediaFile_publicId_key] UNIQUE NONCLUSTERED ([publicId])
+);
+
+COMMIT TRAN;
+
+END TRY
+BEGIN CATCH
+
+IF @@TRANCOUNT > 0
+BEGIN
+    ROLLBACK TRAN;
+END;
+THROW
+
+END CATCH
+
