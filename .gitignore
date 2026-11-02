@@ -6,10 +6,10 @@ coverage/
 next-env.d.ts
 
 # environment (never commit real secrets)
-.env
-.env.local
-.env.*.local
-.env.production*
+.env*
+!.env.example
+
+# Vercel CLI
 .vercel
 
 npm-debug.log*
