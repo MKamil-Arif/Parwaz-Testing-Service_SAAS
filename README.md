@@ -6,6 +6,8 @@ A full-stack online academic testing platform for students across Sindh, Pakista
 
 Built with **Next.js 16 + React 19 + TypeScript + Tailwind CSS 4**, **Prisma ORM** and **Microsoft SQL Server**.
 
+**Live site:** https://rewarding-potential.vercel.app · **Repository:** https://github.com/MKamil-Arif/Parwaz-Testing-Service_SAAS (every push to `master` deploys automatically via Vercel)
+
 ---
 
 ## Features
