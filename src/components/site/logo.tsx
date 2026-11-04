@@ -1,3 +1,4 @@
+
 import Link from "next/link";
 import { cn } from "@/lib/cn";
 
@@ -24,14 +25,14 @@ export function LogoMark({ className }: { className?: string }) {
 
 export function Logo({ light, className }: { light?: boolean; className?: string }) {
   return (
-    <Link href="/" className={cn("group inline-flex items-center gap-2.5", className)} aria-label="Rewarding Potential home">
+    <Link href="/" className={cn("group inline-flex items-center gap-2.5", className)} aria-label="Parwaz Testing Services home">
       <LogoMark className="size-9 shrink-0 transition-transform group-hover:-translate-y-0.5" />
       <span className="leading-none">
         <span className={cn("block font-display text-[17px] font-extrabold tracking-tight", light ? "text-white" : "text-navy-950")}>
-          Rewarding Potential
+          Parwaz Testing Services
         </span>
         <span className={cn("mt-1 block text-[10.5px] font-semibold tracking-[0.12em] uppercase", light ? "text-gold-300" : "text-gold-600")}>
-          Online Academic Testing
+          Knowledge • Merit • Opportunity
         </span>
       </span>
     </Link>
