@@ -40,8 +40,8 @@ export async function Footer() {
   const s = await getSettings();
   const whatsappDigits = s["contact.whatsapp"].replace(/[^\d]/g, "");
   const socials = [
-    { href: s["social.facebook"], label: "Facebook", Icon: FacebookIcon },
-    { href: s["social.instagram"], label: "Instagram", Icon: InstagramIcon },
+    { href: "https://www.facebook.com/share/1GfcmwfjL4/?mibextid=wwXIfr", label: "Facebook", Icon: FacebookIcon },
+    { href: "https://www.instagram.com/parwaztestingservice?psln=MXR0azE1bXp4ZmdnZA%3D%3D&utm_source=qr", label: "Instagram", Icon: InstagramIcon },
     { href: s["social.tiktok"], label: "TikTok", Icon: TikTokIcon },
     { href: s["social.youtube"], label: "YouTube", Icon: YouTubeIcon },
     { href: whatsappDigits ? `https://wa.me/${whatsappDigits}` : "", label: "WhatsApp", Icon: WhatsAppIcon },
