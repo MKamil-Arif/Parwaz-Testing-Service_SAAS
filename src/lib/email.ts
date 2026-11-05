@@ -22,7 +22,7 @@ function getTransporter() {
  * Never throws.
  */
 export async function sendEmail(to: string, subject: string, body: string): Promise<void> {
-  const fullBody = `${body}\n\n— Rewarding Potential\nTest Your Knowledge, Earn Your Future.`;
+  const fullBody = `${body}\n\n— Parwaz Testing Service\nTest Your Knowledge, Earn Your Future.`;
   try {
     const row = await db.emailOutbox.create({
       data: { toEmail: to, subject, body: fullBody, status: smtpConfigured() ? "QUEUED" : "LOGGED" },

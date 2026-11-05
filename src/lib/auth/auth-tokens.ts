@@ -33,7 +33,7 @@ export async function sendVerificationEmail(user: { id: number; email: string; f
   await sendEmail(
     user.email,
     "Verify your email address",
-    `Dear ${user.fullName},\n\nWelcome to Rewarding Potential! Please confirm your email address by opening this link (valid for 48 hours):\n\n${link}\n\nIf you did not create this account, you can ignore this email.`,
+    `Dear ${user.fullName},\n\nWelcome to Parwaz Testing Service! Please confirm your email address by opening this link (valid for 48 hours):\n\n${link}\n\nIf you did not create this account, you can ignore this email.`,
   );
   return link;
 }
@@ -44,7 +44,7 @@ export async function sendPasswordResetEmail(user: { id: number; email: string; 
   await sendEmail(
     user.email,
     "Reset your password",
-    `Dear ${user.fullName},\n\nWe received a request to reset your Rewarding Potential password. Open this link within 1 hour to choose a new password:\n\n${link}\n\nIf you did not request this, you can ignore this email — your password will not change.`,
+    `Dear ${user.fullName},\n\nWe received a request to reset your Parwaz Testing Service password. Open this link within 1 hour to choose a new password:\n\n${link}\n\nIf you did not request this, you can ignore this email — your password will not change.`,
   );
   return link;
 }

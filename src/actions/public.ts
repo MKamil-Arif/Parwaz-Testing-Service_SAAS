@@ -51,7 +51,7 @@ export async function submitContact(_: ActionState, fd: FormData): Promise<Actio
   await sendEmail(
     d.email,
     `We received your message (${ticket.ticketNumber})`,
-    `Dear ${d.name},\n\nThank you for contacting Rewarding Potential. Your reference number is ${ticket.ticketNumber}. Our team will reply by email${d.phone ? " or phone" : ""} as soon as possible.\n\nSubject: ${d.subject}`,
+    `Dear ${d.name},\n\nThank you for contacting Parwaz Testing Service. Your reference number is ${ticket.ticketNumber}. Our team will reply by email${d.phone ? " or phone" : ""} as soon as possible.\n\nSubject: ${d.subject}`,
   );
   return success(`Thank you — your message has been received. Your reference number is ${ticket.ticketNumber}.`);
 }

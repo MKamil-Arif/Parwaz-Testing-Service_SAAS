@@ -17,7 +17,7 @@ export default async function AboutPage() {
   ];
   return (
     <>
-      <PageHero eyebrow="About Rewarding Potential" title="A fair test for every capable student in Sindh" description={s["about.intro"]} />
+      <PageHero eyebrow="About Parwaz Testing Service" title="A fair test for every capable student in Sindh" description={s["about.intro"]} />
 
       <section className="container-page grid gap-6 py-16 md:grid-cols-2">
         <div className="rounded-3xl bg-navy-950 p-8 text-white">

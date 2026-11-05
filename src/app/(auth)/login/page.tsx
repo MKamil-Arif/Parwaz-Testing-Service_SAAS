@@ -18,7 +18,7 @@ export default async function LoginPage({ searchParams }: { searchParams: Promis
   return (
     <div className="w-full max-w-md rounded-3xl border border-navy-100 bg-white p-7 shadow-card sm:p-9">
       <h1 className="text-2xl font-bold">Welcome back</h1>
-      <p className="mt-1 text-sm text-navy-500">Log in to your Rewarding Potential account.</p>
+      <p className="mt-1 text-sm text-navy-500">Log in to your Parwaz Testing Service account.</p>
       {reset && (
         <Alert tone="success" className="mt-5">
           Your password has been reset. Please log in with your new password.
@@ -42,7 +42,7 @@ export default async function LoginPage({ searchParams }: { searchParams: Promis
         </SubmitButton>
       </ActionForm>
       <p className="mt-6 text-center text-sm text-navy-600">
-        New to Rewarding Potential?{" "}
+        New to Parwaz Testing Service?{" "}
         <Link href={next ? `/register?next=${encodeURIComponent(next)}` : "/register"} className="font-semibold text-brand-700 hover:underline">
           Create an account
         </Link>

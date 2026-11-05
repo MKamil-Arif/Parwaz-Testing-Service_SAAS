@@ -28,7 +28,7 @@ export default async function SandboxCheckoutPage({ params }: { params: Promise<
         <div className="overflow-hidden rounded-2xl bg-white shadow-lift ring-1 ring-black/5">
           <div className="border-b border-navy-100 bg-navy-50 px-6 py-4">
             <p className="text-xs font-semibold text-navy-500">Merchant</p>
-            <p className="font-bold text-navy-950">Rewarding Potential</p>
+            <p className="font-bold text-navy-950">Parwaz Testing Service</p>
           </div>
           <div className="space-y-4 px-6 py-6">
             <div className="flex justify-between text-sm">

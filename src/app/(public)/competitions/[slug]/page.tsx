@@ -212,7 +212,7 @@ export default async function CompetitionDetailPage({ params }: { params: Promis
           )}
           <Card>
             <CardBody>
-              <ShareButtons url={`/competitions/${c.slug}`} text={`${c.title} — register on Rewarding Potential`} />
+              <ShareButtons url={`/competitions/${c.slug}`} text={`${c.title} — register on Parwaz Testing Service`} />
             </CardBody>
           </Card>
         </aside>

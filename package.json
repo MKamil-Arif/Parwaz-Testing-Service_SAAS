@@ -2,7 +2,7 @@
   "name": "rewarding-potential",
   "version": "1.0.0",
   "private": true,
-  "description": "Rewarding Potential - online academic testing and competition platform for students in Sindh, Pakistan.",
+  "description": "Parwaz Testing Service - online academic testing and competition platform for students in Sindh, Pakistan.",
   "scripts": {
     "dev": "next dev",
     "build": "next build",

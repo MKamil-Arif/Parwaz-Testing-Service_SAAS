@@ -8,7 +8,7 @@ import { logoutAction } from "@/actions/auth";
 import { AppShell, type NavGroup, type NavItem } from "@/components/app-shell/app-shell";
 import { Alert } from "@/components/ui/layout";
 
-export const metadata: Metadata = { title: { default: "Admin", template: "%s · Admin · Rewarding Potential" }, robots: { index: false } };
+export const metadata: Metadata = { title: { default: "Admin", template: "%s · Admin · Parwaz Testing Service" }, robots: { index: false } };
 
 type Item = NavItem & { perm: Permission };
 

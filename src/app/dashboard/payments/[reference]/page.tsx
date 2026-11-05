@@ -49,7 +49,7 @@ export default async function ReceiptPage({ params }: { params: Promise<{ refere
           <div className="flex items-center gap-3">
             <LogoMark className="size-11" />
             <div>
-              <p className="font-display text-lg font-extrabold">Rewarding Potential</p>
+              <p className="font-display text-lg font-extrabold">Parwaz Testing Service</p>
               <p className="text-xs text-navy-500">{s["contact.email"]} · {s["contact.phone"]}</p>
             </div>
           </div>
@@ -76,7 +76,7 @@ export default async function ReceiptPage({ params }: { params: Promise<{ refere
           </p>
         )}
         <p className="mt-6 text-xs text-navy-500">
-          This receipt confirms a registration fee payment verified by Rewarding Potential. Registration fees are subject to our Refund Policy.
+          This receipt confirms a registration fee payment verified by Parwaz Testing Service. Registration fees are subject to our Refund Policy.
         </p>
       </div>
     </div>

@@ -72,7 +72,7 @@ export function ProfileForm({ defaults: d }: { defaults: Defaults }) {
             <Input id="guardianPhone" name="guardianPhone" type="tel" defaultValue={d.guardianPhone} required />
           </Field>
           <div className="sm:col-span-2">
-            <CheckboxField name="guardianConsent" defaultChecked={d.guardianConsent} required label="My parent/guardian consents to my participation in Rewarding Potential competitions." />
+            <CheckboxField name="guardianConsent" defaultChecked={d.guardianConsent} required label="My parent/guardian consents to my participation in Parwaz Testing Service competitions." />
           </div>
         </div>
       )}
@@ -92,7 +92,7 @@ export function ProfileForm({ defaults: d }: { defaults: Defaults }) {
         <CheckboxField
           name="mediaConsent"
           defaultChecked={d.mediaConsent}
-          label="If I win, Rewarding Potential may publish my full name, school and award-ceremony photos (with my parent/guardian's agreement if I am under 18)."
+          label="If I win, Parwaz Testing Service may publish my full name, school and award-ceremony photos (with my parent/guardian's agreement if I am under 18)."
           hint="Optional. Without this, winners are announced with initials only and no photos."
         />
       </div>

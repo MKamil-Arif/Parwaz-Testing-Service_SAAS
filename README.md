@@ -1,4 +1,4 @@
-# Rewarding Potential
+# Parwaz Testing Service
 
 **Test Your Knowledge, Earn Your Future.**
 

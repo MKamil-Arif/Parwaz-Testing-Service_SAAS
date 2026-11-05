@@ -306,7 +306,7 @@ export default async function HomePage() {
       <section className="py-20 sm:py-24">
         <div className="container-page">
           <SectionHeading
-            eyebrow="Why Rewarding Potential"
+            eyebrow="Why Parwaz Testing Service"
             title="A testing business built on fairness you can check"
             description="We run commercial academic competitions with a social purpose. That only works if students, parents and schools can trust the process."
           />

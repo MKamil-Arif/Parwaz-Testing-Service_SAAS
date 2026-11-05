@@ -10,12 +10,12 @@ export const dynamic = "force-dynamic";
 
 export const metadata: Metadata = {
   title: {
-    default: "Rewarding Potential — Test Your Knowledge, Earn Your Future",
-    template: "%s · Rewarding Potential",
+    default: "Parwaz Testing Service — Test Your Knowledge, Earn Your Future",
+    template: "%s · Parwaz Testing Service",
   },
   description:
     "Affordable online academic competitions for Class 9–12 students across Sindh. Sit a fair, timed online exam and compete for laptops and Chromebooks on a transparent merit list.",
-  applicationName: "Rewarding Potential",
+  applicationName: "Parwaz Testing Service",
 };
 
 export const viewport: Viewport = {

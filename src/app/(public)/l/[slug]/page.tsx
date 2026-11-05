@@ -9,7 +9,7 @@ import { Prose } from "@/components/ui/prose";
 import { buttonClasses } from "@/components/ui/button";
 import { ShareButtons } from "@/components/ui/client-widgets";
 
-export const metadata: Metadata = { title: "Rewarding Potential" };
+export const metadata: Metadata = { title: "Parwaz Testing Service" };
 
 /** Campaign landing page (Admin → Marketing → Campaigns). Visits are counted; attribution cookie is set by the proxy. */
 export default async function LandingPage({ params }: { params: Promise<{ slug: string }> }) {
@@ -24,7 +24,7 @@ export default async function LandingPage({ params }: { params: Promise<{ slug: 
   const comp = campaign.landingCompetition?.status === COMPETITION_STATUS.PUBLISHED ? campaign.landingCompetition : null;
   return (
     <>
-      <PageHero eyebrow="Rewarding Potential" title={campaign.landingHeadline ?? campaign.name}>
+      <PageHero eyebrow="Parwaz Testing Service" title={campaign.landingHeadline ?? campaign.name}>
         <div className="mt-8 flex flex-col gap-3 sm:flex-row">
           <Link href="/register" className={buttonClasses("gold", "lg")}>
             Register now

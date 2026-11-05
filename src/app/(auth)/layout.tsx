@@ -32,7 +32,7 @@ export default function AuthLayout({ children }: { children: React.ReactNode }) 
           </ul>
         </div>
         <p className="relative text-xs text-navy-400">
-          © {new Date().getFullYear()} Rewarding Potential ·{" "}
+          © {new Date().getFullYear()} Parwaz Testing Service ·{" "}
           <Link href="/privacy-policy" className="hover:text-white">
             Privacy
           </Link>{" "}

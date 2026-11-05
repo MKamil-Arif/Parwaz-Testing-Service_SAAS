@@ -15,7 +15,7 @@ export function TicketThread({ messages, ownerName }: { messages: Message[]; own
             )}
           >
             <p className={cn("mb-1 text-xs font-semibold", m.isStaff ? "text-gold-300" : "text-brand-700")}>
-              {m.isStaff ? "Rewarding Potential support" : ownerName} · {formatDateTime(m.createdAt)}
+              {m.isStaff ? "Parwaz Testing Service support" : ownerName} · {formatDateTime(m.createdAt)}
             </p>
             <p className="whitespace-pre-line">{m.body}</p>
           </div>

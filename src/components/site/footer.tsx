@@ -113,7 +113,7 @@ export async function Footer() {
       </div>
       <div className="border-t border-white/10">
         <div className="container-page flex flex-col gap-2 py-6 text-xs text-navy-400 sm:flex-row sm:items-center sm:justify-between">
-          <p>© {new Date().getFullYear()} Rewarding Potential. All rights reserved.</p>
+          <p>© {new Date().getFullYear()} Parwaz Testing Service. All rights reserved.</p>
           <p>{s["site.tagline"]}</p>
         </div>
       </div>

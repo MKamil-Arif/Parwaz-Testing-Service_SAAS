@@ -7,7 +7,7 @@ export const DEFAULT_TIE_BREAK_POLICY = `Students are ranked by total score (hig
 3. **Earlier final submission time** ranks higher.
 4. **Earlier competition registration** ranks higher.
 
-Only results verified by the Rewarding Potential team are ranked. Withheld or disqualified results are excluded. Final merit lists are approved by an administrator before publication.`;
+Only results verified by the Parwaz Testing Service team are ranked. Withheld or disqualified results are excluded. Final merit lists are approved by an administrator before publication.`;
 
 export type RankInput = {
   resultId: number;

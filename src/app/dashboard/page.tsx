@@ -43,7 +43,7 @@ export default async function StudentDashboard({ searchParams }: { searchParams:
     <div className="space-y-6">
       {!user.emailVerifiedAt && <VerifyEmailBanner email={user.email} />}
       {welcome && (
-        <Alert tone="success" title={`Welcome to Rewarding Potential, ${user.fullName.split(" ")[0]}!`}>
+        <Alert tone="success" title={`Welcome to Parwaz Testing Service, ${user.fullName.split(" ")[0]}!`}>
           Your account is ready. Verify your email, then browse competitions to register.
         </Alert>
       )}

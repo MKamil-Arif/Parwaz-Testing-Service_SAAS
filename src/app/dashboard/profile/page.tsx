@@ -92,7 +92,7 @@ export default async function ProfilePage() {
               <p className="text-sm text-navy-600">
                 {user._count.referralsMade} friend(s) signed up · {user.referralsMade.length} registered and paid
               </p>
-              <ShareButtons url={referralLink} text="Join me on Rewarding Potential — online academic competitions for Sindh students with laptop and Chromebook prizes!" />
+              <ShareButtons url={referralLink} text="Join me on Parwaz Testing Service — online academic competitions for Sindh students with laptop and Chromebook prizes!" />
             </CardBody>
           </Card>
 

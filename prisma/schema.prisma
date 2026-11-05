@@ -1,4 +1,4 @@
-// Rewarding Potential - SQL Server data model.
+// Parwaz Testing Service - SQL Server data model.
 //
 // Conventions
 // - Int identity primary keys; public-facing identifiers (registration numbers, payment

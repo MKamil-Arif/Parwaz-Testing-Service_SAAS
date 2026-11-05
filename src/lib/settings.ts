@@ -17,7 +17,7 @@ export const DEFAULT_SETTINGS = {
   "social.tiktok": "",
   "social.youtube": "",
   "about.intro":
-    "Rewarding Potential is an online academic testing business built for students across Sindh — especially in rural and underserved districts where access to competitive testing, and to the devices that make modern learning possible, is limited.",
+    "Parwaz Testing Service is an online academic testing business built for students across Sindh — especially in rural and underserved districts where access to competitive testing, and to the devices that make modern learning possible, is limited.",
   "about.mission":
     "To give every capable student in Sindh a fair, affordable and transparent way to test their knowledge and be rewarded for their academic performance.",
   "about.vision":
@@ -33,7 +33,7 @@ export const DEFAULT_SETTINGS = {
   "about.future":
     "Our first step is academic competitions for Classes 9–12 in Sindh. Over time we aim to offer university entrance testing, recruitment tests, professional assessments and institutional testing contracts — and to earn the trust that established testing services in Pakistan enjoy today. This is our ambition, not a claim about where we are now.",
   "payment.manualInstructions":
-    "Send the exact registration fee to the account below and enter the transaction ID you receive. Your registration is confirmed only after our team verifies the payment (usually within 24 hours).\n\nJazzCash / Easypaisa: 0300 0000000 (Account title: Rewarding Potential) — placeholder, update in Admin → Website content\nBank transfer: Bank name, account number and IBAN — placeholder",
+    "Send the exact registration fee to the account below and enter the transaction ID you receive. Your registration is confirmed only after our team verifies the payment (usually within 24 hours).\n\nJazzCash / Easypaisa: 0300 0000000 (Account title: Parwaz Testing Service) — placeholder, update in Admin → Website content\nBank transfer: Bank name, account number and IBAN — placeholder",
   "home.showLiveRegistrationCount": "false",
   "leaderboard.publicLimit": "100",
 } as const;

@@ -29,7 +29,7 @@ const TIE_BREAK = `Students are ranked by total score (highest first). If two or
 3. **Earlier final submission time** ranks higher.
 4. **Earlier competition registration** ranks higher.
 
-Only results verified by the Rewarding Potential team are ranked. Withheld or disqualified results are excluded. Final merit lists are approved by an administrator before publication.`;
+Only results verified by the Parwaz Testing Service team are ranked. Withheld or disqualified results are excluded. Final merit lists are approved by an administrator before publication.`;
 
 const RULES = `## Before the examination
 - One registration per student. Your registration is confirmed only after your PKR 500 payment is verified.
@@ -47,7 +47,7 @@ const RULES = `## Before the examination
 - The merit list follows the published tie-breaking rules.
 - Ranks 1–10 are eligible for a laptop and ranks 11–30 for a Chromebook, subject to identity and eligibility verification.
 - You may raise a result dispute within 7 days of publication from your result page.
-- Rewarding Potential's decision after reviewing a dispute is final.`;
+- Parwaz Testing Service's decision after reviewing a dispute is final.`;
 
 type Q = [string, string, [string, string, string, string], number];
 const QUESTIONS: Record<string, Q[]> = {
@@ -131,7 +131,7 @@ Contact us to access or correct your data, or to ask for your account to be clos
     `> Draft terms — have them reviewed by a qualified legal adviser before launch.
 
 ## About the service
-Rewarding Potential runs paid online academic competitions. Prizes are awarded for academic performance according to each competition's published rules; participation is not a lottery or a game of chance.
+Parwaz Testing Service runs paid online academic competitions. Prizes are awarded for academic performance according to each competition's published rules; participation is not a lottery or a game of chance.
 
 ## Accounts
 You must provide accurate information and keep your password private. Students under 18 need a parent or guardian's consent. We may suspend accounts that break these terms.
@@ -167,7 +167,7 @@ Refunds are usually processed within 10 working days of approval. Your refund st
 };
 
 const FAQS: [string, string, string][] = [
-  ["GENERAL", "What is Rewarding Potential?", "An online academic testing platform for students across Sindh. You register for a competition, sit a timed online exam, and the highest-ranked students receive laptops and Chromebooks after verification."],
+  ["GENERAL", "What is Parwaz Testing Service?", "An online academic testing platform for students across Sindh. You register for a competition, sit a timed online exam, and the highest-ranked students receive laptops and Chromebooks after verification."],
   ["GENERAL", "Who can take part?", "Students of Class 9, 10, 11, 12 and Intermediate studying in Sindh, unless a competition states otherwise. Students under 18 need a parent or guardian's consent."],
   ["REGISTRATION", "How much does it cost?", "The first competition's registration fee is PKR 500. Each competition shows its fee before you register."],
   ["PAYMENT", "How can I pay?", "By JazzCash, Easypaisa or bank transfer — submit your transaction ID and our team verifies it, usually within 24 hours. Online card/wallet checkout will be added once our payment gateway is activated."],
@@ -279,7 +279,7 @@ async function main() {
         slug: mainSlug,
         title: "Sindh Academic Talent Challenge 2027",
         summary: "Our first province-wide online competition for Class 9–12 students in Sindh. Top 10 win laptops; the next 20 win Chromebooks.",
-        description: `The **Sindh Academic Talent Challenge** is Rewarding Potential's first academic competition, open to secondary and higher-secondary students across all districts of Sindh.
+        description: `The **Sindh Academic Talent Challenge** is Parwaz Testing Service's first academic competition, open to secondary and higher-secondary students across all districts of Sindh.
 
 Students sit one timed, online multiple-choice examination covering Mathematics, Physics, Chemistry, Biology, English and General Knowledge, pitched at Matric and Intermediate level.
 
@@ -293,7 +293,7 @@ We aim for 1,500 registrations for this first competition — a target, not a gu
         eligibilityText: `- Currently enrolled in **Class 9, 10, 11 or 12**, or an **Intermediate** student (including private candidates).
 - Studying or living in **Sindh**.
 - Students under 18 must have a parent or guardian's consent.
-- One registration per student. Staff of Rewarding Potential and their immediate families may take part but are not eligible for prizes.`,
+- One registration per student. Staff of Parwaz Testing Service and their immediate families may take part but are not eligible for prizes.`,
         rules: RULES,
         tieBreakPolicy: TIE_BREAK,
         eligibleProvince: "Sindh",
